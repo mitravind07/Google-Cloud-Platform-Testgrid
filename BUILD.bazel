@@ -1,0 +1,59 @@
+# gazelle:prefix github.com/GoogleCloudPlatform/testgrid
+load("@io_k8s_repo_infra//defs:run_in_workspace.bzl", "workspace_binary")
+
+workspace_binary(
+    name = "go",
+    cmd = "@go_sdk//:bin/go",
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "bazel-*/**",
+            ".git/**",
+        ],
+    ),
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//benchmark:all-srcs",
+        "//cc:all-srcs",
+        "//cluster/canary:all-srcs",
+        "//cluster/prod:all-srcs",
+        "//cmd/api:all-srcs",
+        "//cmd/config_merger:all-srcs",
+        "//cmd/state_comparer:all-srcs",
+        "//cmd/summarizer:all-srcs",
+        "//cmd/tabulator:all-srcs",
+        "//cmd/updater:all-srcs",
+        "//config:all-srcs",
+        "//hack:all-srcs",
+        "//images:all-srcs",
+        "//internal/result:all-srcs",
+        "//java:all-srcs",
+        "//metadata:all-srcs",
+        "//pb:all-srcs",
+        "//pkg/api:all-srcs",
+        "//pkg/merger:all-srcs",
+        "//pkg/pubsub:all-srcs",
+        "//pkg/summarizer:all-srcs",
+        "//pkg/tabulator:all-srcs",
+        "//pkg/updater:all-srcs",
+        "//platform:all-srcs",
+        "//resultstore:all-srcs",
+        "//util:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)
+
+exports_files([
+    "go.mod",
+    "go.sum",
+])
