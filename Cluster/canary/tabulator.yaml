@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testgrid-tabulator
+  namespace: testgrid-canary
+  labels:
+    app: testgrid
+    channel: stable
+    component: tabulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testgrid
+      channel: stable
+      component: tabulator
+  template:
+    metadata:
+      labels:
+        app: testgrid
+        channel: stable
+        component: tabulator
+    spec:
+      serviceAccountName: tabulator
+      containers:
+      - name: tabulator
+        image: gcr.io/k8s-testgrid/tabulator:v20250417-v0.0.174-18-g6730e7b4
+        ports:
+        - name: metrics
+          containerPort: 2112
+        args:
+        - --column-stats
+        - --config=gs://k8s-testgrid-canary/config
+        - --confirm
+        - --json-logs
+        - --persist-queue=gs://k8s-testgrid-canary/queue/tabulator.json
+        - --pubsub=k8s-testgrid/canary-test-group-updates
+        - --read-concurrency=10
+        - --wait=15m
+        - --write-concurrency=10
+        resources:
+          requests:
+            cpu: "30"
+            memory: "25G"
+          limits:
+            cpu: "40"
+            memory: "50G"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    # Uses same as updater
+    iam.gke.io/gcp-service-account: testgrid-canary@k8s-testgrid.iam.gserviceaccount.com
+  name: tabulator
+  namespace: testgrid-canary

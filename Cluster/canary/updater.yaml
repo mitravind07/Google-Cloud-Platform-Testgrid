@@ -1,0 +1,58 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    iam.gke.io/gcp-service-account: testgrid-canary@k8s-testgrid.iam.gserviceaccount.com
+  name: updater
+  namespace: testgrid-canary
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testgrid-updater
+  namespace: testgrid-canary
+  labels:
+    component: updater
+    app: testgrid
+spec:
+  replicas: 1 # https://github.com/GoogleCloudPlatform/testgrid/issues/663
+  selector:
+    matchLabels:
+      app: testgrid
+      component: updater
+  template:
+    metadata:
+      labels:
+        component: updater
+        app: testgrid
+    spec:
+      serviceAccountName: updater
+      containers:
+      - name: updater
+        image: gcr.io/k8s-testgrid/updater:v20250417-v0.0.174-18-g6730e7b4 
+        ports:
+        - name: metrics
+          containerPort: 2112
+        args:
+        - --build-concurrency=10
+        - --build-timeout=5m
+        - --config=gs://k8s-testgrid-canary/config
+        - --confirm
+        - --group-concurrency=10
+        - --group-timeout=20m
+        - --json-logs
+        - --persist-queue=gs://k8s-testgrid-canary/queue/updater.json
+        - --subscribe=kubernetes-jenkins=kubernetes-jenkins/testgrid-canary
+        - --subscribe=oss-prow=k8s-testgrid/testgrid-canary
+        - --subscribe=istio-prow=k8s-testgrid/testgrid-canary
+        - --subscribe=kubernetes-ci-logs=k8s-testgrid/testgrid-canary-kubernetes-ci-logs
+        - --wait=4h
+        resources:
+          requests:
+            cpu: "30"
+            memory: "75G"
+          limits:
+            cpu: "40"
+            memory: "150G"
+---
