@@ -1,0 +1,20 @@
+---
+gitHubLogin: "google-oss-robot"
+gitHubToken: "/etc/github-token/oauth"
+onCallAddress: "https://storage.googleapis.com/kubernetes-jenkins/oncall.json"
+skipPullRequest: false
+skipOncallAssignment: true
+gitHubOrg: "GoogleCloudPlatform"
+gitHubRepo: "testgrid"
+remoteName: "testgrid"
+headBranchName: "autobump-canary"
+upstreamURLBase: "https://raw.githubusercontent.com/GoogleCloudPlatform/testgrid/master"
+includedConfigPaths:
+  - "cluster/canary"
+targetVersion: "latest"
+prefixes:
+  - name: "Testgrid Canary"
+    prefix: "gcr.io/k8s-testgrid/"
+    repo: "https://github.com/GoogleCloudPlatform/testgrid"
+    summarise: true
+    consistentImages: true
